@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrayerTimes - توقيت الأذان</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="header">
+        <h1>بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ</h1>
+        <p>﴿إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَوْقُوتًا﴾</p>
+    </div>
+    <div class="container">
+        <h2>توقيت الأذان حسب الموقع أو المدينة</h2>
+        <p>يمكنك إما إدخال الدولة والمدينة أو السماح للتطبيق بتحديد موقعك تلقائيًا للحصول على أوقات الصلاة.</p>
+
+        <!-- إدخال الدولة والمدينة -->
+        <div id="location">
+            <label for="country">الدولة:</label>
+            <input type="text" id="country" placeholder="أدخل الدولة">
+            <label for="city">المدينة:</label>
+            <input type="text" id="city" placeholder="أدخل المدينة">
+            <button onclick="getPrayerTimes()">عرض التوقيت</button>
+        </div>
+
+        <!-- زر لتحديد الموقع تلقائيًا -->
+        <div id="location-button">
+            <p>أو</p>
+            <button onclick="getLocation()">استخدام موقعي الحالي</button>
+        </div>
+
+        <!-- منطقة عرض أوقات الصلاة -->
+        <div id="prayer-times">
+            <!-- ستظهر أوقات الصلاة هنا -->
+        </div>
+
+        <!-- العلم سيظهر هنا عند إدخال الدولة -->
+        <div id="flag"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html><!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خريطة اتجاه القبلة باستخدام OpenStreetMap</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map {
+            width: 100%;
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>اتجاه القبلة</h2>
+        <p>اضغط على الزر أدناه لتحديد موقعك وعرض الخريطة.</p>
+
+        <!-- زر لتحديد الموقع -->
+        <button onclick="getLocationAndDisplayQibla()">استخدام موقعي الحالي</button>
+
+        <!-- عرض زاوية القبلة -->
+        <p id="qibla-angle"></p>
+
+        <!-- منطقة عرض الخريطة -->
+        <div id="map"></div>
+    </div>
+
+    <!-- مكتبة Leaflet.js لعرض الخريطة -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script>
+        // إحداثيات الكعبة
+        const kaabaCoordinates = {
+            lat: 21.4225,
+            lon: 39.8262
+        };
+
+        // حساب زاوية القبلة بناءً على موقع المستخدم
+        function calculateQiblaDirection(userLat, userLon) {
+            const kaabaLat = kaabaCoordinates.lat * (Math.PI / 180); // تحويل إلى راديان
+            const kaabaLon = kaabaCoordinates.lon * (Math.PI / 180);
+            const userLatRad = userLat * (Math.PI / 180);
+            const userLonRad = userLon * (Math.PI / 180);
+
+            const deltaLon = kaabaLon - userLonRad;
+
+            const x = Math.sin(deltaLon) * Math.cos(kaabaLat);
+            const y = Math.cos(userLatRad) * Math.sin(kaabaLat) - Math.sin(userLatRad) * Math.cos(kaabaLat) * Math.cos(deltaLon);
+            const qiblaAngle = Math.atan2(x, y) * (180 / Math.PI);
+
+            return (qiblaAngle + 360) % 360; // التأكد من أن الزاوية بين 0 و 360
+        }
+
+        // تحديث زاوية القبلة على الصفحة
+        function displayQiblaAngle(qiblaDirection) {
+            const qiblaAngleText = document.getElementById('qibla-angle');
+            qiblaAngleText.textContent = `زاوية القبلة: ${qiblaDirection.toFixed(2)}° من الشمال الحقيقي`;
+        }
+
+        // تهيئة الخريطة باستخدام Leaflet.js
+        function initializeMap(userLat, userLon) {
+            const userLocation = [userLat, userLon];
+            const kaabaLocation = [kaabaCoordinates.lat, kaabaCoordinates.lon];
+
+            const map = L.map('map').setView(userLocation, 6); // تحديد مستوى التكبير
+
+            // تحميل الخريطة من OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // إضافة مؤشر لموقع المستخدم
+            L.marker(userLocation).addTo(map).bindPopup('موقعك الحالي').openPopup();
+
+            // رسم خط من موقع المستخدم إلى الكعبة
+            const line = L.polyline([userLocation, kaabaLocation], { color: 'red' }).addTo(map);
+
+            // تكبير الخريطة لاحتواء الخط
+            map.fitBounds(line.getBounds());
+        }
+
+        // جلب الموقع الجغرافي للمستخدم وحساب اتجاه القبلة
+        function getLocationAndDisplayQibla() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const userLat = position.coords.latitude;
+                        const userLon = position.coords.longitude;
+
+                        // حساب اتجاه القبلة
+                        const qiblaDirection = calculateQiblaDirection(userLat, userLon);
+
+                        // عرض زاوية القبلة
+                        displayQiblaAngle(qiblaDirection);
+
+                        // عرض الخريطة مع اتجاه القبلة
+                        initializeMap(userLat, userLon);
+                    },
+                    () => {
+                        alert('يرجى تمكين الوصول إلى الموقع الجغرافي.');
+                    }
+                );
+            } else {
+                alert('المتصفح لا يدعم تحديد الموقع الجغرافي.');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+body {
+    font-family: 'Amiri', serif;
+    background-color: #f4f4f4;
+    background-image: url('islamic-pattern.jpg'); /* صورة خلفية بنمط إسلامي */
+    background-size: cover;
+    background-attachment: fixed;
+    direction: rtl;
+    color: white;
+}
+
+.header {
+    text-align: center;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.header h1 {
+    font-size: 24px;
+}
+
+.header p {
+    font-size: 20px;
+    font-weight: bold;
+    color: #ffcc00;
+}
+
+.container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+h2 {
+    text-align: center;
+    color: #ffcc00;
+}
+
+#location {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+#location input {
+    flex: 1;
+    margin: 0 10px;
+    padding: 10px;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#prayer-times {
+    margin-top: 20px;
+}
+
+#prayer-times ul {
+    list-style: none;
+    padding: 0;
+}
+
+#prayer-times li {
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    margin-bottom: 5px;
+    border-radius: 5px;
+}
+
+#flag {
+    text-align: center;
+    margin-top: 20px;
+}
+
+#flag img {
+    width: 100px;
+    height: auto;
+    border-radius: 5px;
+}
