@@ -1,50 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-    <meta name="description" content="موقع يوفر توقيت الصلاة والقبلة بناءً على الموقع الجغرافي.">
-<meta name="keywords" content="توقيت الصلاة, القبلة, الصلاة, مواقيت الصلاة, تطبيق الصلاة">
-   <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PrayerTimes - توقيت الأذان</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="header">
-        <h1>بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ</h1>
-        <p>﴿إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَوْقُوتًا﴾</p>
-    </div>
-    <div class="container">
-        <h2>توقيت الأذان حسب الموقع أو المدينة</h2>
-        <p>يمكنك إما إدخال الدولة والمدينة أو السماح للتطبيق بتحديد موقعك تلقائيًا للحصول على أوقات الصلاة.</p>
-
-        <!-- إدخال الدولة والمدينة -->
-        <div id="location">
-            <label for="country">الدولة:</label>
-            <input type="text" id="country" placeholder="أدخل الدولة">
-            <label for="city">المدينة:</label>
-            <input type="text" id="city" placeholder="أدخل المدينة">
-            <button onclick="getPrayerTimes()">عرض التوقيت</button>
-        </div>
-
-        <!-- زر لتحديد الموقع تلقائيًا -->
-        <div id="location-button">
-            <p>أو</p>
-            <button onclick="getLocation()">استخدام موقعي الحالي</button>
-        </div>
-
-        <!-- منطقة عرض أوقات الصلاة -->
-        <div id="prayer-times">
-            <!-- ستظهر أوقات الصلاة هنا -->
-        </div>
-
-        <!-- العلم سيظهر هنا عند إدخال الدولة -->
-        <div id="flag"></div>
-    </div>
-    <script src="script.js"></script>
-</body>
-</html><!DOCTYPE html>
-<html lang="ar">
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>خريطة اتجاه القبلة باستخدام OpenStreetMap</title>
@@ -53,6 +9,11 @@
         #map {
             width: 100%;
             height: 400px;
+        }
+        #status {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -69,6 +30,9 @@
 
         <!-- منطقة عرض الخريطة -->
         <div id="map"></div>
+
+        <!-- حالة الاتجاه -->
+        <p id="status"></p>
     </div>
 
     <!-- مكتبة Leaflet.js لعرض الخريطة -->
@@ -80,6 +44,8 @@
             lat: 21.4225,
             lon: 39.8262
         };
+
+        let userLat, userLon, qiblaDirection;
 
         // حساب زاوية القبلة بناءً على موقع المستخدم
         function calculateQiblaDirection(userLat, userLon) {
@@ -130,17 +96,24 @@
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        const userLat = position.coords.latitude;
-                        const userLon = position.coords.longitude;
+                        userLat = position.coords.latitude;
+                        userLon = position.coords.longitude;
 
                         // حساب اتجاه القبلة
-                        const qiblaDirection = calculateQiblaDirection(userLat, userLon);
+                        qiblaDirection = calculateQiblaDirection(userLat, userLon);
 
                         // عرض زاوية القبلة
                         displayQiblaAngle(qiblaDirection);
 
                         // عرض الخريطة مع اتجاه القبلة
                         initializeMap(userLat, userLon);
+
+                        // مراقبة اتجاه الجهاز
+                        if (window.DeviceOrientationEvent) {
+                            window.addEventListener('deviceorientation', handleOrientation);
+                        } else {
+                            alert('جهازك لا يدعم البوصلة.');
+                        }
                     },
                     () => {
                         alert('يرجى تمكين الوصول إلى الموقع الجغرافي.');
@@ -148,6 +121,26 @@
                 );
             } else {
                 alert('المتصفح لا يدعم تحديد الموقع الجغرافي.');
+            }
+        }
+
+        // معالجة بيانات الاتجاه من بوصلة الجهاز
+        function handleOrientation(event) {
+            const alpha = event.alpha; // زاوية الجهاز بالنسبة للشمال الحقيقي
+
+            if (alpha !== null && qiblaDirection !== undefined) {
+                // حساب الفارق بين اتجاه الجهاز واتجاه القبلة
+                const diff = Math.abs(qiblaDirection - alpha);
+
+                const statusText = document.getElementById('status');
+
+                if (diff < 10 || diff > 350) {
+                    statusText.textContent = "أنت في الاتجاه الصحيح نحو القبلة";
+                    statusText.style.color = "green";
+                } else {
+                    statusText.textContent = "يرجى تعديل اتجاهك نحو القبلة";
+                    statusText.style.color = "red";
+                }
             }
         }
     </script>
