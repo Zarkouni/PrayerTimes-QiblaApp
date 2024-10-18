@@ -2,37 +2,64 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
+    <meta name="description" content="موقع يوفر توقيت الصلاة والقبلة بناءً على الموقع الجغرافي.">
+    <meta name="keywords" content="توقيت الصلاة, القبلة, الصلاة, مواقيت الصلاة, تطبيق الصلاة">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>خريطة اتجاه القبلة باستخدام OpenStreetMap</title>
+    <title>PrayerTimes - توقيت الأذان واتجاه القبلة</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css">
     <style>
         #map {
             width: 100%;
             height: 400px;
         }
-        #status {
-            font-size: 18px;
-            font-weight: bold;
-            margin-top: 10px;
-        }
     </style>
 </head>
 <body>
+    <div class="header">
+        <h1>بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ</h1>
+        <p>﴿إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَوْقُوتًا﴾</p>
+    </div>
+
     <div class="container">
+        <h2>توقيت الأذان حسب الموقع أو المدينة</h2>
+        <p>يمكنك إما إدخال الدولة والمدينة أو السماح للتطبيق بتحديد موقعك تلقائيًا للحصول على أوقات الصلاة.</p>
+
+        <!-- إدخال الدولة والمدينة -->
+        <div id="location">
+            <label for="country">الدولة:</label>
+            <input type="text" id="country" placeholder="أدخل الدولة">
+            <label for="city">المدينة:</label>
+            <input type="text" id="city" placeholder="أدخل المدينة">
+            <button onclick="getPrayerTimes()">عرض التوقيت</button>
+        </div>
+
+        <!-- زر لتحديد الموقع تلقائيًا -->
+        <div id="location-button">
+            <p>أو</p>
+            <button onclick="getLocation()">استخدام موقعي الحالي</button>
+        </div>
+
+        <!-- منطقة عرض أوقات الصلاة -->
+        <div id="prayer-times">
+            <!-- ستظهر أوقات الصلاة هنا -->
+        </div>
+
+        <!-- العلم سيظهر هنا عند إدخال الدولة -->
+        <div id="flag"></div>
+
+        <hr>
+
+        <!-- خريطة اتجاه القبلة -->
         <h2>اتجاه القبلة</h2>
         <p>اضغط على الزر أدناه لتحديد موقعك وعرض الخريطة.</p>
-
-        <!-- زر لتحديد الموقع -->
-        <button onclick="getLocationAndDisplayQibla()">استخدام موقعي الحالي</button>
+        <button onclick="getLocationAndDisplayQibla()">استخدام موقعي الحالي لاتجاه القبلة</button>
 
         <!-- عرض زاوية القبلة -->
         <p id="qibla-angle"></p>
 
         <!-- منطقة عرض الخريطة -->
         <div id="map"></div>
-
-        <!-- حالة الاتجاه -->
-        <p id="status"></p>
     </div>
 
     <!-- مكتبة Leaflet.js لعرض الخريطة -->
@@ -44,8 +71,6 @@
             lat: 21.4225,
             lon: 39.8262
         };
-
-        let userLat, userLon, qiblaDirection;
 
         // حساب زاوية القبلة بناءً على موقع المستخدم
         function calculateQiblaDirection(userLat, userLon) {
@@ -96,24 +121,17 @@
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        userLat = position.coords.latitude;
-                        userLon = position.coords.longitude;
+                        const userLat = position.coords.latitude;
+                        const userLon = position.coords.longitude;
 
                         // حساب اتجاه القبلة
-                        qiblaDirection = calculateQiblaDirection(userLat, userLon);
+                        const qiblaDirection = calculateQiblaDirection(userLat, userLon);
 
                         // عرض زاوية القبلة
                         displayQiblaAngle(qiblaDirection);
 
                         // عرض الخريطة مع اتجاه القبلة
                         initializeMap(userLat, userLon);
-
-                        // مراقبة اتجاه الجهاز
-                        if (window.DeviceOrientationEvent) {
-                            window.addEventListener('deviceorientation', handleOrientation);
-                        } else {
-                            alert('جهازك لا يدعم البوصلة.');
-                        }
                     },
                     () => {
                         alert('يرجى تمكين الوصول إلى الموقع الجغرافي.');
@@ -124,23 +142,66 @@
             }
         }
 
-        // معالجة بيانات الاتجاه من بوصلة الجهاز
-        function handleOrientation(event) {
-            const alpha = event.alpha; // زاوية الجهاز بالنسبة للشمال الحقيقي
+        // جلب أوقات الصلاة بناءً على الدولة والمدينة
+        function getPrayerTimes() {
+            const country = document.getElementById('country').value;
+            const city = document.getElementById('city').value;
 
-            if (alpha !== null && qiblaDirection !== undefined) {
-                // حساب الفارق بين اتجاه الجهاز واتجاه القبلة
-                const diff = Math.abs(qiblaDirection - alpha);
+            if (country && city) {
+                // هنا يمكنك استدعاء API للحصول على أوقات الصلاة
+                // مثلاً باستخدام API مثل MuslimSalat أو أي خدمة مشابهة
+                // على سبيل المثال:
+                const apiUrl = `https://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}&method=2`;
 
-                const statusText = document.getElementById('status');
+                fetch(apiUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        const times = data.data.timings;
+                        const prayerTimesDiv = document.getElementById('prayer-times');
+                        prayerTimesDiv.innerHTML = `
+                            <p>الفجر: ${times.Fajr}</p>
+                            <p>الظهر: ${times.Dhuhr}</p>
+                            <p>العصر: ${times.Asr}</p>
+                            <p>المغرب: ${times.Maghrib}</p>
+                            <p>العشاء: ${times.Isha}</p>
+                        `;
+                    });
+            } else {
+                alert('يرجى إدخال الدولة والمدينة.');
+            }
+        }
 
-                if (diff < 10 || diff > 350) {
-                    statusText.textContent = "أنت في الاتجاه الصحيح نحو القبلة";
-                    statusText.style.color = "green";
-                } else {
-                    statusText.textContent = "يرجى تعديل اتجاهك نحو القبلة";
-                    statusText.style.color = "red";
-                }
+        // جلب أوقات الصلاة باستخدام الموقع الجغرافي
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+
+                        // هنا يمكنك استدعاء API للحصول على أوقات الصلاة بناءً على الإحداثيات
+                        const apiUrl = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=2`;
+
+                        fetch(apiUrl)
+                            .then(response => response.json())
+                            .then(data => {
+                                const times = data.data.timings;
+                                const prayerTimesDiv = document.getElementById('prayer-times');
+                                prayerTimesDiv.innerHTML = `
+                                    <p>الفجر: ${times.Fajr}</p>
+                                    <p>الظهر: ${times.Dhuhr}</p>
+                                    <p>العصر: ${times.Asr}</p>
+                                    <p>المغرب: ${times.Maghrib}</p>
+                                    <p>العشاء: ${times.Isha}</p>
+                                `;
+                            });
+                    },
+                    () => {
+                        alert('يرجى تمكين الوصول إلى الموقع الجغرافي.');
+                    }
+                );
+            } else {
+                alert('المتصفح لا يدعم تحديد الموقع الجغرافي.');
             }
         }
     </script>
