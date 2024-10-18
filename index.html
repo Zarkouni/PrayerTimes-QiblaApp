@@ -1,26 +1,18 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-    <meta charset="UTF-8">
     <meta name="description" content="موقع يوفر توقيت الصلاة والقبلة بناءً على الموقع الجغرافي.">
-    <meta name="keywords" content="توقيت الصلاة, القبلة, الصلاة, مواقيت الصلاة, تطبيق الصلاة">
+<meta name="keywords" content="توقيت الصلاة, القبلة, الصلاة, مواقيت الصلاة, تطبيق الصلاة">
+   <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PrayerTimes - توقيت الأذان واتجاه القبلة</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <title>PrayerTimes - توقيت الأذان</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        #map {
-            width: 100%;
-            height: 400px;
-        }
-    </style>
 </head>
 <body>
     <div class="header">
         <h1>بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ</h1>
         <p>﴿إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَوْقُوتًا﴾</p>
     </div>
-
     <div class="container">
         <h2>توقيت الأذان حسب الموقع أو المدينة</h2>
         <p>يمكنك إما إدخال الدولة والمدينة أو السماح للتطبيق بتحديد موقعك تلقائيًا للحصول على أوقات الصلاة.</p>
@@ -47,13 +39,30 @@
 
         <!-- العلم سيظهر هنا عند إدخال الدولة -->
         <div id="flag"></div>
-
-        <hr>
-
-        <!-- خريطة اتجاه القبلة -->
+    </div>
+    <script src="script.js"></script>
+</body>
+</html><!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خريطة اتجاه القبلة باستخدام OpenStreetMap</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map {
+            width: 100%;
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
         <h2>اتجاه القبلة</h2>
         <p>اضغط على الزر أدناه لتحديد موقعك وعرض الخريطة.</p>
-        <button onclick="getLocationAndDisplayQibla()">استخدام موقعي الحالي لاتجاه القبلة</button>
+
+        <!-- زر لتحديد الموقع -->
+        <button onclick="getLocationAndDisplayQibla()">استخدام موقعي الحالي</button>
 
         <!-- عرض زاوية القبلة -->
         <p id="qibla-angle"></p>
@@ -132,69 +141,6 @@
 
                         // عرض الخريطة مع اتجاه القبلة
                         initializeMap(userLat, userLon);
-                    },
-                    () => {
-                        alert('يرجى تمكين الوصول إلى الموقع الجغرافي.');
-                    }
-                );
-            } else {
-                alert('المتصفح لا يدعم تحديد الموقع الجغرافي.');
-            }
-        }
-
-        // جلب أوقات الصلاة بناءً على الدولة والمدينة
-        function getPrayerTimes() {
-            const country = document.getElementById('country').value;
-            const city = document.getElementById('city').value;
-
-            if (country && city) {
-                // هنا يمكنك استدعاء API للحصول على أوقات الصلاة
-                // مثلاً باستخدام API مثل MuslimSalat أو أي خدمة مشابهة
-                // على سبيل المثال:
-                const apiUrl = `https://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}&method=2`;
-
-                fetch(apiUrl)
-                    .then(response => response.json())
-                    .then(data => {
-                        const times = data.data.timings;
-                        const prayerTimesDiv = document.getElementById('prayer-times');
-                        prayerTimesDiv.innerHTML = `
-                            <p>الفجر: ${times.Fajr}</p>
-                            <p>الظهر: ${times.Dhuhr}</p>
-                            <p>العصر: ${times.Asr}</p>
-                            <p>المغرب: ${times.Maghrib}</p>
-                            <p>العشاء: ${times.Isha}</p>
-                        `;
-                    });
-            } else {
-                alert('يرجى إدخال الدولة والمدينة.');
-            }
-        }
-
-        // جلب أوقات الصلاة باستخدام الموقع الجغرافي
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const lat = position.coords.latitude;
-                        const lon = position.coords.longitude;
-
-                        // هنا يمكنك استدعاء API للحصول على أوقات الصلاة بناءً على الإحداثيات
-                        const apiUrl = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=2`;
-
-                        fetch(apiUrl)
-                            .then(response => response.json())
-                            .then(data => {
-                                const times = data.data.timings;
-                                const prayerTimesDiv = document.getElementById('prayer-times');
-                                prayerTimesDiv.innerHTML = `
-                                    <p>الفجر: ${times.Fajr}</p>
-                                    <p>الظهر: ${times.Dhuhr}</p>
-                                    <p>العصر: ${times.Asr}</p>
-                                    <p>المغرب: ${times.Maghrib}</p>
-                                    <p>العشاء: ${times.Isha}</p>
-                                `;
-                            });
                     },
                     () => {
                         alert('يرجى تمكين الوصول إلى الموقع الجغرافي.');
