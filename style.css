@@ -86,3 +86,18 @@ button {
     height: auto;
     border-radius: 5px;
 }
+/* إضافة في نهاية ملف style.css */
+
+/* لأحجام الشاشات الصغيرة مثل الهواتف */
+@media only screen and (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+  #map {
+    height: 300px; /* تعديل ارتفاع الخريطة للهواتف */
+  }
+  .container {
+    padding: 10px; /* تقليل الحواف الداخلية */
+  }
+  /* إضافة تعديلات أخرى حسب الحاجة */
+}
