@@ -86,18 +86,31 @@ button {
     height: auto;
     border-radius: 5px;
 }
-/* إضافة في نهاية ملف style.css */
+/* أكواد سابقة لتنسيق الموقع */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+}
 
-/* لأحجام الشاشات الصغيرة مثل الهواتف */
-@media only screen and (max-width: 768px) {
-  body {
-    font-size: 14px;
-  }
-  #map {
-    height: 300px; /* تعديل ارتفاع الخريطة للهواتف */
-  }
-  .container {
-    padding: 10px; /* تقليل الحواف الداخلية */
-  }
-  /* إضافة تعديلات أخرى حسب الحاجة */
+/* قم بلصق الكود الجديد هنا */
+#location {
+  text-align: right;
+  direction: rtl;
+  margin: 0 auto;
+  max-width: 400px;
+}
+
+#location label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+#location input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+  text-align: right;
 }
